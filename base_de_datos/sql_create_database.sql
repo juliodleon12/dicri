@@ -1,0 +1,42 @@
+CREATE DATABASE  DICRI_DB;
+GO
+
+USE DICRI_DB;
+GO
+
+CREATE TABLE Users(
+	Id INT IDENTITY(1,1) PRIMARY KEY,
+	Nombre NVARCHAR(100) NOT NULL,
+	Email NVARCHAR(150) UNIQUE NOT NULL, 
+	PasswordHash NVARCHAR(200) NOT NULL,
+	Rol NVARCHAR(50) NOT NULL, -- Tecnico o Coordinador
+	Activo BIT DEFAULT 1
+);
+
+
+CREATE TABLE Expediente (
+	Id INT IDENTITY(1,1) PRIMARY KEY,
+	Codigo NVARCHAR(50) NOT NULL,
+	FechaRegistro DATETIME2 NOT NULL DEFAULT GETDATE(),
+	TecnicoId INT NOT NULL, 
+	Estado NVARCHAR(20) NOT NULL DEFAULT 'REGISTRADO',
+	JustificacionRechazo NVARCHAR(MAX) NULL,
+	FOREIGN KEY (TecnicoId) REFERENCES Users(Id)
+);
+
+CREATE TABLE Indicio (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    ExpedienteId INT NOT NULL,
+    Descripcion NVARCHAR(500),
+    Color NVARCHAR(100),
+    Tamano NVARCHAR(100),
+    Peso NVARCHAR(100),
+    Ubicacion NVARCHAR(200),
+    TecnicoId INT NOT NULL,
+    FechaRegistro DATETIME2 DEFAULT GETDATE(),
+    FOREIGN KEY (ExpedienteId) REFERENCES Expediente(Id),
+    FOREIGN KEY (TecnicoId) REFERENCES Users(Id)
+);
+
+GO
+
