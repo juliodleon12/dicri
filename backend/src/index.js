@@ -2,6 +2,9 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
+const swaggerUi = require("swagger-ui-express");
+const swaggerDoc = require("../package.json");
+
 const { connectDB } = require("./infrastructure/db/connection");
 
 // Rutas
@@ -22,6 +25,7 @@ app.use(express.json());
     app.use("/api/usuarios", usuarioRoutes);
     app.use("/api/expedientes", expedienteRoutes);
     app.use("/api/indicios", indicioRoutes);
+    app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => console.log(`API corriendo en puerto ${PORT}`));
