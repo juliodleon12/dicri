@@ -1,4 +1,4 @@
-const IUsuarioRepository = require("../../domain/repositories/IUsuarioRepository");
+const IUsuarioRepository = require("../../domain/repositories/IUsuarioReposiroty");
 const { executeSP } = require("../db/executeSP");
 
 class UsuarioRepository extends IUsuarioRepository {
