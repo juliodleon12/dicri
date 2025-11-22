@@ -11,5 +11,6 @@ const controller = new UsuarioController(service);
 
 router.post("/login", controller.login);
 router.get("/", controller.getAll);
+router.post("/", controller.create);
 
 module.exports = router;

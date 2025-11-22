@@ -1,5 +1,5 @@
 class IUsuarioRepository {
-  login(email, passwordHash) {
+  login(email) {
     throw new Error("Not implemented");
   }
 

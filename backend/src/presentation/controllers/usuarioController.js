@@ -23,6 +23,16 @@ class UsuarioController {
       res.status(500).json({ error: err.message });
     }
   };
+
+  create = async (req, res) => {
+    try {
+      const { nombre, email, password, rol } = req.body;
+      const created = await this.usuarioService.createUser({ nombre, email, password, rol });
+      res.status(201).json(created);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
+  };  
 }
 
 module.exports = UsuarioController;

@@ -6,10 +6,9 @@ class UsuarioRepository extends IUsuarioRepository {
     super();
   }
 
-  async login(email, passwordHash) {
+  async login(email) {
     const result = await executeSP("sp_Usuario_Login", {
-      Email: email,
-      PasswordHash: passwordHash,
+      Email: email
     });
 
     return result[0] || null;
@@ -18,6 +17,17 @@ class UsuarioRepository extends IUsuarioRepository {
   async getAll() {
     return await executeSP("sp_Usuario_Get");
   }
+
+  async create({ nombre, email, passwordHash, rol }) {
+    const result = await executeSP("sp_Usuario_Insert", {
+      Nombre: nombre,
+      Email: email,
+      PasswordHash: passwordHash,
+      Rol: rol
+    });
+    return result[0] || null;
+  }
+
 }
 
 module.exports = UsuarioRepository;

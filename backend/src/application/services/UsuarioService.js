@@ -10,12 +10,12 @@ class UsuarioService {
     const email = loginDTO.email;
     const password = loginDTO.password;
 
-    // Hash temporal para SP (por simplicidad usamos hash directo)
-    const passwordHash = bcrypt.hashSync(password, 8);
-
-    const user = await this.usuarioRepository.login(email, passwordHash);
+    const user = await this.usuarioRepository.login(email);
 
     if (!user) throw new Error("Credenciales inválidas");
+
+    const valid = bcrypt.compareSync(password, user.PasswordHash);
+    if (!valid) throw new Error("Credenciales inválidas");    
 
     // Generar JWT
     const token = jwt.sign(
@@ -42,6 +42,18 @@ class UsuarioService {
   async getAll() {
     return await this.usuarioRepository.getAll();
   }
+
+  async createUser({ nombre, email, password, rol = "Tecnico" }) {
+    if (!nombre || !email || !password) throw new Error("Nombre, email y contraseña requeridos");
+    const passwordHash = bcrypt.hashSync(password, 10);
+    const created = await this.usuarioRepository.create({
+      nombre,
+      email,
+      passwordHash,
+      rol
+    });
+    return created;
+  }  
 }
 
 module.exports = UsuarioService;
