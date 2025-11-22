@@ -1,12 +1,12 @@
-FROM node:18
+FROM node:18-alpine
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
-COPY package.json package-lock.json ./
-RUN npm install
+COPY package.json package-lock.json* ./
+RUN npm install --production
 
 COPY . .
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["node", "src/index.js"]

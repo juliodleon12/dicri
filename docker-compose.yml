@@ -1,35 +1,53 @@
-version: '3.9'
-services:
+version: "3.9"
 
+services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: dicri_sql
     environment:
-      SA_PASSWORD: "YourStrong!Passw0rd"
       ACCEPT_EULA: "Y"
+      SA_PASSWORD: "test12345"
     ports:
       - "1433:1433"
     volumes:
       - sql_data:/var/opt/mssql
+    networks:
+      - dicri_net
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dicri_backend
     environment:
       DB_USER: sa
-      DB_PASSWORD: YourStrong!Passw0rd
+      DB_PASSWORD: test12345
       DB_SERVER: sqlserver
       DB_NAME: DICRI_DB
       JWT_SECRET: SuperSecretJWT123
+      PORT: 3000
     depends_on:
       - sqlserver
     ports:
       - "3000:3000"
+    networks:
+      - dicri_net
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: dicri_frontend
+    ports:
+      - "8080:80"
     depends_on:
       - backend
-    ports:
-      - "5173:80"
+    networks:
+      - dicri_net
 
 volumes:
   sql_data:
+
+networks:
+  dicri_net:
+    driver: bridge
