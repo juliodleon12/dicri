@@ -1,17 +1,104 @@
 {
-  "openapi": "3.0.0",
+  "openapi": "3.0.3",
   "info": {
     "title": "DICRI API",
     "version": "1.0.0",
-    "description": "API REST para gestión de expedientes e indicios."
+    "description": "API del sistema DICRI para la gestión de expedientes, indicios y autenticación."
   },
   "servers": [
     {
-      "url": "http://localhost:3000/api"
+      "url": "http://localhost:3000"
     }
   ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string" },
+          "password": { "type": "string" }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "token": { "type": "string" },
+          "usuario": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer" },
+              "nombre": { "type": "string" },
+              "email": { "type": "string" },
+              "rol": { "type": "string" }
+            }
+          }
+        }
+      },
+      "Expediente": {
+        "type": "object",
+        "properties": {
+          "Id": { "type": "integer" },
+          "Codigo": { "type": "string" },
+          "FechaRegistro": { "type": "string", "format": "date-time" },
+          "TecnicoId": { "type": "integer" },
+          "Estado": { "type": "string" },
+          "JustificacionRechazo": { "type": "string" }
+        }
+      },
+      "ExpedienteCreateRequest": {
+        "type": "object",
+        "required": ["codigo", "tecnicoId"],
+        "properties": {
+          "codigo": { "type": "string" },
+          "tecnicoId": { "type": "integer" }
+        }
+      },
+      "CambioEstadoRequest": {
+        "type": "object",
+        "required": ["estado"],
+        "properties": {
+          "estado": { "type": "string" },
+          "justificacion": { "type": "string" }
+        }
+      },
+      "Indicio": {
+        "type": "object",
+        "properties": {
+          "Id": { "type": "integer" },
+          "ExpedienteId": { "type": "integer" },
+          "Descripcion": { "type": "string" },
+          "Color": { "type": "string" },
+          "Tamano": { "type": "string" },
+          "Peso": { "type": "string" },
+          "Ubicacion": { "type": "string" },
+          "TecnicoId": { "type": "integer" }
+        }
+      },
+      "IndicioCreateRequest": {
+        "type": "object",
+        "required": ["expedienteId", "tecnicoId"],
+        "properties": {
+          "expedienteId": { "type": "integer" },
+          "descripcion": { "type": "string" },
+          "color": { "type": "string" },
+          "tamano": { "type": "string" },
+          "peso": { "type": "string" },
+          "ubicacion": { "type": "string" },
+          "tecnicoId": { "type": "integer" }
+        }
+      }
+    }
+  },
   "paths": {
-    "/usuarios/login": {
+    "/api/usuarios/login": {
       "post": {
         "summary": "Login de usuario",
         "tags": ["Usuarios"],
@@ -19,25 +106,147 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "email": { "type": "string" },
-                  "password": { "type": "string" }
-                },
-                "required": ["email", "password"]
-              }
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Login exitoso"
+            "description": "Login correcto",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LoginResponse" }
+              }
+            }
           },
-          "400": {
-            "description": "Credenciales inválidas"
-          }
+          "400": { "description": "Credenciales inválidas" }
         }
+      }
+    },
+    "/api/usuarios": {
+      "get": {
+        "summary": "Listar usuarios",
+        "tags": ["Usuarios"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+
+    "/api/expedientes": {
+      "get": {
+        "summary": "Listar expedientes",
+        "tags": ["Expedientes"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": { "200": { "description": "Lista de expedientes" } }
+      },
+      "post": {
+        "summary": "Crear expediente",
+        "tags": ["Expedientes"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ExpedienteCreateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Expediente creado" }
+        }
+      }
+    },
+
+    "/api/expedientes/{id}": {
+      "get": {
+        "summary": "Obtener expediente por ID",
+        "tags": ["Expedientes"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+
+    "/api/expedientes/{id}/estado": {
+      "put": {
+        "summary": "Cambiar estado del expediente",
+        "tags": ["Expedientes"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CambioEstadoRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Estado actualizado" },
+          "400": { "description": "Error de validación" }
+        }
+      }
+    },
+
+    "/api/expedientes/reportes/data": {
+      "get": {
+        "summary": "Generar reportes",
+        "tags": ["Expedientes"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "fechaInicio", "in": "query", "schema": { "type": "string" } },
+          { "name": "fechaFin", "in": "query", "schema": { "type": "string" } },
+          { "name": "estado", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+
+    "/api/indicios": {
+      "post": {
+        "summary": "Crear indicio",
+        "tags": ["Indicios"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/IndicioCreateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Indicio creado" },
+          "400": { "description": "Error de validación" }
+        }
+      }
+    },
+
+    "/api/indicios/{id}": {
+      "get": {
+        "summary": "Listar indicios por expediente",
+        "tags": ["Indicios"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "OK" } }
       }
     }
   }
